@@ -1,0 +1,128 @@
+{
+  "info": {
+    "_postman_id": "bank-api-collection-2026-03-24",
+    "name": "Bank Project API",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "Create User",
+      "request": {
+        "method": "POST",
+        "header": [
+          { "key": "Content-Type", "value": "application/json" }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"name\": \"Alice\",\n  \"email\": \"alice@example.com\"\n}"
+        },
+        "url": {
+          "raw": "http://localhost:5000/api/users",
+          "protocol": "http",
+          "host": ["localhost"],
+          "port": "5000",
+          "path": ["api", "users"]
+        }
+      }
+    },
+    {
+      "name": "Get All Users",
+      "request": {
+        "method": "GET",
+        "url": {
+          "raw": "http://localhost:5000/api/users",
+          "protocol": "http",
+          "host": ["localhost"],
+          "port": "5000",
+          "path": ["api", "users"]
+        }
+      }
+    },
+    {
+      "name": "Create Account",
+      "request": {
+        "method": "POST",
+        "header": [
+          { "key": "Content-Type", "value": "application/json" }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"user_id\": 1,\n  \"account_type\": \"SAVINGS\",\n  \"balance\": 1000\n}"
+        },
+        "url": {
+          "raw": "http://localhost:5000/api/accounts",
+          "protocol": "http",
+          "host": ["localhost"],
+          "port": "5000",
+          "path": ["api", "accounts"]
+        }
+      }
+    },
+    {
+      "name": "Get All Accounts",
+      "request": {
+        "method": "GET",
+        "url": {
+          "raw": "http://localhost:5000/api/accounts",
+          "protocol": "http",
+          "host": ["localhost"],
+          "port": "5000",
+          "path": ["api", "accounts"]
+        }
+      }
+    },
+    {
+      "name": "Deposit to Account",
+      "request": {
+        "method": "POST",
+        "header": [
+          { "key": "Content-Type", "value": "application/json" }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"amount\": 500\n}"
+        },
+        "url": {
+          "raw": "http://localhost:5000/api/accounts/1/deposit",
+          "protocol": "http",
+          "host": ["localhost"],
+          "port": "5000",
+          "path": ["api", "accounts", "1", "deposit"]
+        }
+      }
+    },
+    {
+      "name": "Withdraw from Account",
+      "request": {
+        "method": "POST",
+        "header": [
+          { "key": "Content-Type", "value": "application/json" }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"amount\": 200\n}"
+        },
+        "url": {
+          "raw": "http://localhost:5000/api/accounts/1/withdraw",
+          "protocol": "http",
+          "host": ["localhost"],
+          "port": "5000",
+          "path": ["api", "accounts", "1", "withdraw"]
+        }
+      }
+    },
+    {
+      "name": "Get Account Transactions",
+      "request": {
+        "method": "GET",
+        "url": {
+          "raw": "http://localhost:5000/api/accounts/1/transactions",
+          "protocol": "http",
+          "host": ["localhost"],
+          "port": "5000",
+          "path": ["api", "accounts", "1", "transactions"]
+        }
+      }
+    }
+  ]
+}
