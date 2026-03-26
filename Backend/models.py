@@ -1,28 +1,26 @@
-from sqlalchemy import Column, Integer, String, DECIMAL, ForeignKey, TIMESTAMP
-from sqlalchemy.ext.declarative import declarative_base
+# MongoDB does not require ORM models. Data will be stored as dictionaries.
+# You can define helper functions or classes if you want to enforce structure.
 
-Base = declarative_base()
+def user_dict(name, password_hash, role, created_at):
+    return {
+        "name": name,
+        "password_hash": password_hash,
+        "role": role,
+        "created_at": created_at
+    }
 
-class User(Base):
-    __tablename__ = "users"
-    user_id = Column(Integer, primary_key=True, index=True)
-    password_hash = Column(String(255), nullable=False)
-    role = Column(String(20), default="customer")
-    name = Column(String(100))
-    created_at = Column(TIMESTAMP)
+def account_dict(user_id, balance, account_type, created_at):
+    return {
+        "user_id": user_id,
+        "balance": balance,
+        "account_type": account_type,
+        "created_at": created_at
+    }
 
-class Account(Base):
-    __tablename__ = "accounts"
-    account_id = Column(Integer, primary_key=True, index=True)
-    user_id = Column(Integer, ForeignKey("users.user_id"))
-    balance = Column(DECIMAL(10, 2), default=0)
-    account_type = Column(String(50))
-    created_at = Column(TIMESTAMP)
-
-class Transaction(Base):
-    __tablename__ = "transactions"
-    txn_id = Column(Integer, primary_key=True, index=True)
-    account_id = Column(Integer, ForeignKey("accounts.account_id"))
-    txn_type = Column(String(20))
-    amount = Column(DECIMAL(10, 2))
-    created_at = Column(TIMESTAMP)
+def transaction_dict(account_id, txn_type, amount, created_at):
+    return {
+        "account_id": account_id,
+        "txn_type": txn_type,
+        "amount": amount,
+        "created_at": created_at
+    }

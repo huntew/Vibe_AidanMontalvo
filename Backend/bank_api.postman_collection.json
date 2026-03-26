@@ -103,11 +103,11 @@
           "raw": "{\n  \"amount\": 500\n}"
         },
         "url": {
-          "raw": "http://localhost:5000/api/accounts/1/deposit",
+          "raw": "http://localhost:5000/api/accounts/69c55a5415b765f58cccc345/deposit",
           "protocol": "http",
           "host": ["localhost"],
           "port": "5000",
-          "path": ["api", "accounts", "1", "deposit"]
+          "path": ["api", "accounts", "69c55a5415b765f58cccc345", "deposit"]
         }
       }
     },
@@ -123,11 +123,11 @@
           "raw": "{\n  \"amount\": 200\n}"
         },
         "url": {
-          "raw": "http://localhost:5000/api/accounts/1/withdraw",
+          "raw": "http://localhost:5000/api/accounts/69c55a5415b765f58cccc345/withdraw",
           "protocol": "http",
           "host": ["localhost"],
           "port": "5000",
-          "path": ["api", "accounts", "1", "withdraw"]
+          "path": ["api", "accounts", "69c55a5415b765f58cccc345", "withdraw"]
         }
       }
     },
@@ -136,11 +136,11 @@
       "request": {
         "method": "GET",
         "url": {
-          "raw": "http://localhost:5000/api/accounts/1/transactions",
+          "raw": "http://localhost:5000/api/accounts/69c55a5415b765f58cccc345/transactions",
           "protocol": "http",
           "host": ["localhost"],
           "port": "5000",
-          "path": ["api", "accounts", "1", "transactions"]
+          "path": ["api", "accounts", "69c55a5415b765f58cccc345", "transactions"]
         }
       }
     }

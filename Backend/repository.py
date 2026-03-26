@@ -1,63 +1,33 @@
-from models import User, Account, Transaction
-from database import SessionLocal
+
+from database import db
+from models import user_dict, account_dict, transaction_dict
 
 def get_all_users():
-    db = SessionLocal()
-    try:
-        return db.query(User).all()
-    finally:
-        db.close()
-
-def get_all_accounts():
-    db = SessionLocal()
-    try:
-        return db.query(Account).all()
-    finally:
-        db.close()
-
-def get_all_transactions():
-    db = SessionLocal()
-    try:
-        return db.query(Transaction).all()
-    finally:
-        db.close()
-
-
-def create_user(name, password_hash, role, created_at):
-    db = SessionLocal()
-    user = User(
-        name=name,
-        password_hash=password_hash,
-        role=role,
-        created_at=created_at
-    )
-    db.add(user)
-    db.commit()
-    db.refresh(user)
-    db.close()
-    return user
+    return list(db["users"].find())
 
 def get_user_by_name(name):
-    db = SessionLocal()
-    try:
-        return db.query(User).filter(User.name == name).first()
-    finally:
-        db.close()
+    return db["users"].find_one({"name": name})
+
+def create_user(name, password_hash, role, created_at):
+    user = user_dict(name, password_hash, role, created_at)
+    result = db["users"].insert_one(user)
+    user["_id"] = result.inserted_id
+    return user
+
+def get_all_accounts():
+    return list(db["accounts"].find())
 
 def create_account(user_id, balance, account_type, created_at):
-    db = SessionLocal()
-    account = Account(user_id=user_id, balance=balance, account_type=account_type, created_at=created_at)
-    db.add(account)
-    db.commit()
-    db.refresh(account)
-    db.close()
+    account = account_dict(user_id, balance, account_type, created_at)
+    result = db["accounts"].insert_one(account)
+    account["_id"] = result.inserted_id
     return account
 
+def get_all_transactions():
+    return list(db["transactions"].find())
+
 def create_transaction(account_id, txn_type, amount, created_at):
-    db = SessionLocal()
-    txn = Transaction(account_id=account_id, txn_type=txn_type, amount=amount, created_at=created_at)
-    db.add(txn)
-    db.commit()
-    db.refresh(txn)
-    db.close()
+    txn = transaction_dict(account_id, txn_type, amount, created_at)
+    result = db["transactions"].insert_one(txn)
+    txn["_id"] = result.inserted_id
     return txn

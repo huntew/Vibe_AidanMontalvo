@@ -71,7 +71,7 @@ function App() {
       }
       setTxnError('');
       try {
-        const res = await fetch(`/api/accounts/${selectedAccount.account_id}/deposit`, {
+        const res = await fetch(`/api/accounts/${String(selectedAccount.account_id)}/deposit`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ amount: Number(depositAmount) })
@@ -98,7 +98,7 @@ function App() {
       }
       setTxnError('');
       try {
-        const res = await fetch(`/api/accounts/${selectedAccount.account_id}/withdraw`, {
+        const res = await fetch(`/api/accounts/${String(selectedAccount.account_id)}/withdraw`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ amount: Number(withdrawAmount) })
@@ -201,7 +201,7 @@ function App() {
       if ((currentUser && currentUser.role === 'admin') || (typeof userId === 'undefined' && currentUser && currentUser.role === 'admin')) {
         setAccounts(allAccounts);
       } else {
-        setAccounts(allAccounts.filter(a => a.user_id === userId));
+        setAccounts(allAccounts.filter(a => String(a.user_id) === String(userId)));
       }
     } catch (e) {}
   };
@@ -231,10 +231,10 @@ function App() {
   // Filter accounts for current user
   const visibleAccounts = currentUser?.role === 'admin'
     ? accounts
-    : accounts.filter(a => a.user_id === currentUser?.user_id);
+    : accounts.filter(a => String(a.user_id) === String(currentUser?.user_id));
 
   return (
-    <div style={{ maxWidth: 800, margin: '2rem auto', padding: 20, border: '1px solid #ccc', borderRadius: 8 }}>
+    <div style={{ maxWidth: 1000, margin: '2rem auto', padding: 20, border: '1px solid #ccc', borderRadius: 8 }}>
       <h1>Bank App</h1>
       {message && <div style={{ color: 'blue', marginBottom: 10 }}>{message}</div>}
       {!currentUser ? (
@@ -255,11 +255,12 @@ function App() {
               <div>Loading users...</div>
             ) : (
               Object.entries(accounts.reduce((acc, a) => {
-                acc[a.user_id] = acc[a.user_id] || [];
-                acc[a.user_id].push(a);
+                const key = String(a.user_id);
+                acc[key] = acc[key] || [];
+                acc[key].push(a);
                 return acc;
               }, {})).map(([userId, userAccounts]) => {
-                const user = users.find(u => u.user_id === Number(userId));
+                const user = users.find(u => String(u.user_id) === String(userId));
                 return (
                   <div key={userId} style={{ marginBottom: 16 }}>
                     <div style={{ fontWeight: 'bold', color: '#888', marginBottom: 4 }}>
