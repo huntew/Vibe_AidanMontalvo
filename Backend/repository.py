@@ -22,14 +22,27 @@ def get_all_transactions():
     finally:
         db.close()
 
-def create_user(name, email, created_at):
+
+def create_user(name, password_hash, role, created_at):
     db = SessionLocal()
-    user = User(name=name, email=email, created_at=created_at)
+    user = User(
+        name=name,
+        password_hash=password_hash,
+        role=role,
+        created_at=created_at
+    )
     db.add(user)
     db.commit()
     db.refresh(user)
     db.close()
     return user
+
+def get_user_by_name(name):
+    db = SessionLocal()
+    try:
+        return db.query(User).filter(User.name == name).first()
+    finally:
+        db.close()
 
 def create_account(user_id, balance, account_type, created_at):
     db = SessionLocal()

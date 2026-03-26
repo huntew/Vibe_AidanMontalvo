@@ -6,8 +6,9 @@ Base = declarative_base()
 class User(Base):
     __tablename__ = "users"
     user_id = Column(Integer, primary_key=True, index=True)
+    password_hash = Column(String(255), nullable=False)
+    role = Column(String(20), default="customer")
     name = Column(String(100))
-    email = Column(String(100), unique=True)
     created_at = Column(TIMESTAMP)
 
 class Account(Base):

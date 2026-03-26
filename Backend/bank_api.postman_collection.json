@@ -1,12 +1,12 @@
 {
   "info": {
-    "_postman_id": "bank-api-collection-2026-03-24",
-    "name": "Bank Project API",
+    "_postman_id": "bank-api-collection-simplified-2026-03-25",
+    "name": "Bank Project API (Simplified User)",
     "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
   },
   "item": [
     {
-      "name": "Create User",
+      "name": "Register User",
       "request": {
         "method": "POST",
         "header": [
@@ -14,14 +14,34 @@
         ],
         "body": {
           "mode": "raw",
-          "raw": "{\n  \"name\": \"Alice\",\n  \"email\": \"alice@example.com\"\n}"
+          "raw": "{\n  \"name\": \"alice\",\n  \"password\": \"password123\",\n  \"role\": \"customer\"\n}"
         },
         "url": {
-          "raw": "http://localhost:5000/api/users",
+          "raw": "http://localhost:5000/api/register",
           "protocol": "http",
           "host": ["localhost"],
           "port": "5000",
-          "path": ["api", "users"]
+          "path": ["api", "register"]
+        }
+      }
+    },
+    {
+      "name": "Login User",
+      "request": {
+        "method": "POST",
+        "header": [
+          { "key": "Content-Type", "value": "application/json" }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"name\": \"alice\",\n  \"password\": \"password123\"\n}"
+        },
+        "url": {
+          "raw": "http://localhost:5000/api/login",
+          "protocol": "http",
+          "host": ["localhost"],
+          "port": "5000",
+          "path": ["api", "login"]
         }
       }
     },
