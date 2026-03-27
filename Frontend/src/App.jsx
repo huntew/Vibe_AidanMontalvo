@@ -1,8 +1,64 @@
+// Deposit Modal Component
+function DepositModal({ account, depositAmount, setDepositAmount, txnError, handleDeposit, onClose }) {
+  const depositInputRef = React.useRef(null);
+  React.useEffect(() => {
+    if (depositInputRef.current) depositInputRef.current.focus();
+  }, []);
+  return (
+    <div style={{ background: '#181828', color: '#fff', border: '2px solid #aa3bff', borderRadius: 8, padding: 20, position: 'fixed', top: '30%', left: '50%', transform: 'translate(-50%, -30%)', zIndex: 1000 }}>
+      <h3>Deposit to Account #{account.account_id}</h3>
+      {txnError && <div style={{ color: 'red' }}>{txnError}</div>}
+      <input
+        type="number"
+        placeholder="Amount"
+        value={depositAmount}
+        min="1"
+        onChange={e => setDepositAmount(e.target.value)}
+        style={{ marginRight: 8 }}
+        ref={depositInputRef}
+      />
+      <button onClick={handleDeposit}>Deposit</button>
+      <button onClick={onClose} style={{ marginLeft: 8 }}>Cancel</button>
+    </div>
+  );
+}
+
+// Withdraw Modal Component
+function WithdrawModal({ account, withdrawAmount, setWithdrawAmount, txnError, handleWithdraw, onClose }) {
+  const withdrawInputRef = React.useRef(null);
+  React.useEffect(() => {
+    if (withdrawInputRef.current) withdrawInputRef.current.focus();
+  }, []);
+  return (
+    <div style={{ background: '#181828', color: '#fff', border: '2px solid #aa3bff', borderRadius: 8, padding: 20, position: 'fixed', top: '30%', left: '50%', transform: 'translate(-50%, -30%)', zIndex: 1000 }}>
+      <h3>Withdraw from Account #{account.account_id}</h3>
+      {txnError && <div style={{ color: 'red' }}>{txnError}</div>}
+      <input
+        type="number"
+        placeholder="Amount"
+        value={withdrawAmount}
+        min="1"
+        onChange={e => setWithdrawAmount(e.target.value)}
+        style={{ marginRight: 8 }}
+        ref={withdrawInputRef}
+      />
+      <button onClick={handleWithdraw}>Withdraw</button>
+      <button onClick={onClose} style={{ marginLeft: 8 }}>Cancel</button>
+    </div>
+  );
+}
 // Create Account Form
 function CreateAccountForm({ userId, onClose, onCreated }) {
   const [accountType, setAccountType] = useState('SAVINGS');
   const [balance, setBalance] = useState('');
   const [error, setError] = useState('');
+  const balanceInputRef = React.useRef(null);
+
+  React.useEffect(() => {
+    if (balanceInputRef.current) {
+      balanceInputRef.current.focus();
+    }
+  }, []);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -31,21 +87,45 @@ function CreateAccountForm({ userId, onClose, onCreated }) {
   };
 
   return (
-    <div style={{ background: '#fff', border: '1px solid #ccc', padding: 20, borderRadius: 8, margin: '20px 0' }}>
-      <h3>Create Account</h3>
-      {error && <div style={{ color: 'red' }}>{error}</div>}
+    <div style={{
+      background: '#181828',
+      color: '#fff',
+      border: '2px solid #aa3bff',
+      borderRadius: 8,
+      padding: 24,
+      margin: '20px 0',
+      minWidth: 340,
+      boxShadow: '0 4px 24px 0 #0008',
+      position: 'fixed',
+      top: '25%',
+      left: '50%',
+      transform: 'translate(-50%, -25%)',
+      zIndex: 1200
+    }}>
+      <h3 style={{ color: '#aa3bff', marginBottom: 16 }}>Create Account</h3>
+      {error && <div style={{ color: '#ff6b6b', marginBottom: 10 }}>{error}</div>}
       <form onSubmit={handleSubmit}>
-        <label>Account Type: </label>
-        <select value={accountType} onChange={e => setAccountType(e.target.value)}>
+        <label style={{ color: '#fff' }}>Account Type: </label>
+        <select value={accountType} onChange={e => setAccountType(e.target.value)} style={{ marginLeft: 8, marginBottom: 12, background: '#232346', color: '#fff', border: '1px solid #444', borderRadius: 4, padding: '4px 8px' }}>
           <option value="SAVINGS">SAVINGS</option>
           <option value="CHECKING">CHECKING</option>
         </select>
         <br />
-        <label>Initial Balance: </label>
-        <input type="number" value={balance} onChange={e => setBalance(e.target.value)} required min="0" />
+        <label style={{ color: '#fff' }}>Initial Balance: </label>
+        <input
+          type="number"
+          value={balance}
+          onChange={e => setBalance(e.target.value)}
+          required
+          min="0"
+          style={{ marginLeft: 8, marginBottom: 12, background: '#232346', color: '#fff', border: '1px solid #444', borderRadius: 4, padding: '4px 8px' }}
+          ref={balanceInputRef}
+        />
         <br />
-        <button type="submit">Create</button>
-        <button type="button" onClick={onClose} style={{ marginLeft: 8 }}>Cancel</button>
+        <div style={{ marginTop: 16 }}>
+          <button type="submit" style={{ background: '#aa3bff', color: '#fff', border: 'none', borderRadius: 4, padding: '6px 18px', marginRight: 8, cursor: 'pointer' }}>Create</button>
+          <button type="button" onClick={onClose} style={{ background: '#232346', color: '#fff', border: '1px solid #444', borderRadius: 4, padding: '6px 18px', cursor: 'pointer' }}>Cancel</button>
+        </div>
       </form>
     </div>
   );
@@ -59,6 +139,32 @@ import Customers from './Customers';
 import Accounts from './Accounts';
 
 function App() {
+      // Transaction modal state
+      const [transactions, setTransactions] = useState([]);
+      const [txnLoading, setTxnLoading] = useState(false);
+      const [txnFetchError, setTxnFetchError] = useState('');
+
+      // Fetch transactions for selected account
+      const handleFetchTransactions = async (account) => {
+        setTxnLoading(true);
+        setTxnFetchError('');
+        setTransactions([]);
+        try {
+          const res = await fetch(`/api/accounts/${account.account_id}/transactions`);
+          if (!res.ok) {
+            const err = await res.json();
+            setTxnFetchError(err.description || 'Failed to fetch transactions.');
+            setTxnLoading(false);
+            return;
+          }
+          const data = await res.json();
+          setTransactions(Array.isArray(data) ? data : []);
+          setTxnLoading(false);
+        } catch (e) {
+          setTxnFetchError('Error fetching transactions.');
+          setTxnLoading(false);
+        }
+      };
     // Deposit/Withdraw modal state
     const [depositAmount, setDepositAmount] = useState('');
     const [withdrawAmount, setWithdrawAmount] = useState('');
@@ -270,10 +376,10 @@ function App() {
                       {userAccounts.map(acc => (
                         <li key={acc.account_id} style={{ marginBottom: 8 }}>
                           <b>ID:</b> {acc.account_id} | <b>Type:</b> {acc.account_type} | <b>Balance:</b> ${acc.balance}
-                          <button style={{ marginLeft: 8 }} onClick={() => setAccountDetails(acc)}>View</button>
+                          {/* View button removed */}
                           <button style={{ marginLeft: 4 }} onClick={() => { setSelectedAccount(acc); setShowDeposit(true); }}>Deposit</button>
                           <button style={{ marginLeft: 4 }} onClick={() => { setSelectedAccount(acc); setShowWithdraw(true); }}>Withdraw</button>
-                          <button style={{ marginLeft: 4 }} onClick={() => { setSelectedAccount(acc); setShowTransactions(true); }}>Transactions</button>
+                          <button style={{ marginLeft: 4 }} onClick={() => { setSelectedAccount(acc); setShowTransactions(true); handleFetchTransactions(acc); }}>Transactions</button>
                         </li>
                       ))}
                     </ul>
@@ -286,10 +392,10 @@ function App() {
               {accounts.map(acc => (
                 <li key={acc.account_id} style={{ marginBottom: 8 }}>
                   <b>ID:</b> {acc.account_id} | <b>Type:</b> {acc.account_type} | <b>Balance:</b> ${acc.balance}
-                  <button style={{ marginLeft: 8 }} onClick={() => setAccountDetails(acc)}>View</button>
+                  {/* View button removed */}
                   <button style={{ marginLeft: 4 }} onClick={() => { setSelectedAccount(acc); setShowDeposit(true); }}>Deposit</button>
                   <button style={{ marginLeft: 4 }} onClick={() => { setSelectedAccount(acc); setShowWithdraw(true); }}>Withdraw</button>
-                  <button style={{ marginLeft: 4 }} onClick={() => { setSelectedAccount(acc); setShowTransactions(true); }}>Transactions</button>
+                  <button style={{ marginLeft: 4 }} onClick={() => { setSelectedAccount(acc); setShowTransactions(true); handleFetchTransactions(acc); }}>Transactions</button>
                 </li>
               ))}
             </ul>
@@ -300,37 +406,64 @@ function App() {
 
           {/* Deposit Modal */}
           {showDeposit && selectedAccount && (
-            <div style={{ background: '#fff', border: '2px solid #aa3bff', borderRadius: 8, padding: 20, position: 'fixed', top: '30%', left: '50%', transform: 'translate(-50%, -30%)', zIndex: 1000 }}>
-              <h3>Deposit to Account #{selectedAccount.account_id}</h3>
-              {txnError && <div style={{ color: 'red' }}>{txnError}</div>}
-              <input
-                type="number"
-                placeholder="Amount"
-                value={depositAmount}
-                min="1"
-                onChange={e => setDepositAmount(e.target.value)}
-                style={{ marginRight: 8 }}
-              />
-              <button onClick={handleDeposit}>Deposit</button>
-              <button onClick={() => { setShowDeposit(false); setDepositAmount(''); setTxnError(''); }} style={{ marginLeft: 8 }}>Cancel</button>
-            </div>
+            <DepositModal
+              account={selectedAccount}
+              depositAmount={depositAmount}
+              setDepositAmount={setDepositAmount}
+              txnError={txnError}
+              handleDeposit={handleDeposit}
+              onClose={() => { setShowDeposit(false); setDepositAmount(''); setTxnError(''); }}
+            />
           )}
 
           {/* Withdraw Modal */}
           {showWithdraw && selectedAccount && (
-            <div style={{ background: '#fff', border: '2px solid #aa3bff', borderRadius: 8, padding: 20, position: 'fixed', top: '30%', left: '50%', transform: 'translate(-50%, -30%)', zIndex: 1000 }}>
-              <h3>Withdraw from Account #{selectedAccount.account_id}</h3>
-              {txnError && <div style={{ color: 'red' }}>{txnError}</div>}
-              <input
-                type="number"
-                placeholder="Amount"
-                value={withdrawAmount}
-                min="1"
-                onChange={e => setWithdrawAmount(e.target.value)}
-                style={{ marginRight: 8 }}
-              />
-              <button onClick={handleWithdraw}>Withdraw</button>
-              <button onClick={() => { setShowWithdraw(false); setWithdrawAmount(''); setTxnError(''); }} style={{ marginLeft: 8 }}>Cancel</button>
+            <WithdrawModal
+              account={selectedAccount}
+              withdrawAmount={withdrawAmount}
+              setWithdrawAmount={setWithdrawAmount}
+              txnError={txnError}
+              handleWithdraw={handleWithdraw}
+              onClose={() => { setShowWithdraw(false); setWithdrawAmount(''); setTxnError(''); }}
+            />
+          )}
+
+
+          {/* Transactions Modal (placeholder) */}
+          {showTransactions && selectedAccount && (
+            <div style={{ background: '#181828', color: '#fff', border: '2px solid #007bff', borderRadius: 8, padding: 20, position: 'fixed', top: '20%', left: '50%', transform: 'translate(-50%, -20%)', zIndex: 1000, minWidth: 400 }}>
+              <h3>Transaction History for Account #{selectedAccount.account_id}</h3>
+              <div style={{ margin: '20px 0' }}>
+                {txnLoading ? (
+                  <span>Loading transactions...</span>
+                ) : txnFetchError ? (
+                  <span style={{ color: '#ff6b6b' }}>{txnFetchError}</span>
+                ) : transactions.length === 0 ? (
+                  <span>No transactions found for this account.</span>
+                ) : (
+                  <table style={{ width: '100%', background: '#232346', color: '#fff', borderCollapse: 'collapse', borderRadius: 4 }}>
+                    <thead>
+                      <tr style={{ background: '#2d2d5a' }}>
+                        <th style={{ padding: '6px 8px', borderBottom: '1px solid #444' }}>Transaction ID</th>
+                        <th style={{ padding: '6px 8px', borderBottom: '1px solid #444' }}>Date</th>
+                        <th style={{ padding: '6px 8px', borderBottom: '1px solid #444' }}>Type</th>
+                        <th style={{ padding: '6px 8px', borderBottom: '1px solid #444' }}>Amount</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {transactions.map((txn, idx) => (
+                        <tr key={idx}>
+                          <td style={{ padding: '4px 8px', borderBottom: '1px solid #333', fontFamily: 'monospace', fontSize: 13 }}>{txn.txn_id || '-'}</td>
+                          <td style={{ padding: '4px 8px', borderBottom: '1px solid #333' }}>{txn.created_at ? new Date(txn.created_at).toLocaleString() : '-'}</td>
+                          <td style={{ padding: '4px 8px', borderBottom: '1px solid #333' }}>{txn.txn_type || '-'}</td>
+                          <td style={{ padding: '4px 8px', borderBottom: '1px solid #333' }}>${txn.amount != null ? txn.amount : '-'}</td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                )}
+              </div>
+              <button onClick={() => { setShowTransactions(false); setTransactions([]); setTxnFetchError(''); setTxnLoading(false); }} style={{ marginTop: 16 }}>Close</button>
             </div>
           )}
         </div>
