@@ -2,6 +2,7 @@ import logging
 #logging.basicConfig(level=logging.DEBUG)
 
 from flask import Flask, jsonify, request, abort
+from flask_jwt_extended import JWTManager, create_access_token, jwt_required, get_jwt_identity
 from flask_cors import CORS
 from datetime import datetime
 
@@ -15,6 +16,8 @@ from database import db
 from werkzeug.security import generate_password_hash, check_password_hash
 
 app = Flask(__name__)
+app.config['JWT_SECRET_KEY'] = 'your-secret-key'  # TODO: Use a secure key or load from env
+jwt = JWTManager(app)
 
 # --- User Endpoints ---
 
@@ -52,7 +55,9 @@ def api_login():
     user = get_user_by_name(data["name"])
     if not user or not check_password_hash(user["password_hash"], data["password"]):
         abort(401, description="Invalid name or password")
+    access_token = create_access_token(identity=str(user.get("_id")))
     return jsonify({
+        "access_token": access_token,
         "user_id": str(user.get("_id")),
         "role": user.get("role"),
         "name": user.get("name"),
@@ -96,6 +101,7 @@ def api_create_user():
 
 # --- Account Endpoints ---
 @app.route('/api/accounts', methods=['GET'])
+@jwt_required()
 def api_get_accounts():
     accounts = get_all_accounts()
     return jsonify([
@@ -109,6 +115,7 @@ def api_get_accounts():
     ])
 
 @app.route('/api/accounts', methods=['POST'])
+@jwt_required()
 def api_create_account():
     data = request.get_json()
     if not data or "user_id" not in data or "account_type" not in data:
@@ -128,6 +135,7 @@ def api_create_account():
     }), 201
 
 @app.route('/api/accounts/<account_id>', methods=['GET'])
+@jwt_required()
 def api_get_account(account_id):
     from bson import ObjectId
     account = db["accounts"].find_one({"_id": ObjectId(account_id)})
@@ -143,6 +151,7 @@ def api_get_account(account_id):
 
 
 @app.route('/api/accounts/<account_id>/deposit', methods=['POST'])
+@jwt_required()
 def api_deposit(account_id):
     from bson import ObjectId
     account = db["accounts"].find_one({"_id": ObjectId(account_id)})
@@ -159,6 +168,7 @@ def api_deposit(account_id):
 
 
 @app.route('/api/accounts/<account_id>/withdraw', methods=['POST'])
+@jwt_required()
 def api_withdraw(account_id):
     from bson import ObjectId
     account = db["accounts"].find_one({"_id": ObjectId(account_id)})
@@ -176,6 +186,7 @@ def api_withdraw(account_id):
     return jsonify({"balance": new_balance})
 
 @app.route('/api/accounts/<account_id>/transactions', methods=['GET'])
+@jwt_required()
 def api_get_transactions(account_id):
     from bson import ObjectId
     account = db["accounts"].find_one({"_id": ObjectId(account_id)})
