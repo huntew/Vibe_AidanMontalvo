@@ -208,4 +208,4 @@ def api_get_transactions(account_id):
 # (Optional) You can add a sample-data endpoint that inserts demo data into the database using repository functions if needed.
 
 if __name__ == '__main__':
-    app.run(debug=True)
+    app.run(host='0.0.0.0', port=5000, debug=True)
