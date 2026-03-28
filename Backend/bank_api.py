@@ -120,9 +120,16 @@ def api_create_account():
     data = request.get_json()
     if not data or "user_id" not in data or "account_type" not in data:
         abort(400, description="Missing user_id or account_type")
+    balance = data.get("balance", 0)
+    # Validate balance has at most two decimal places
+    if isinstance(balance, float) or isinstance(balance, int):
+        if balance < 0:
+            abort(400, description="Balance must be non-negative")
+        if round(balance * 100) != balance * 100:
+            abort(400, description="Balance cannot have more than two decimal places")
     account = create_account(
         user_id=data["user_id"],
-        balance=data.get("balance", 0),
+        balance=balance,
         account_type=data["account_type"],
         created_at=datetime.now().isoformat()
     )
@@ -161,6 +168,9 @@ def api_deposit(account_id):
     amount = data.get("amount", 0)
     if amount <= 0:
         abort(400, description="Deposit amount must be positive")
+    # Validate amount has at most two decimal places
+    if round(amount * 100) != amount * 100:
+        abort(400, description="Deposit amount cannot have more than two decimal places")
     new_balance = float(account.get("balance", 0)) + amount
     db["accounts"].update_one({"_id": ObjectId(account_id)}, {"$set": {"balance": new_balance}})
     create_transaction(account_id=str(account_id), txn_type="DEPOSIT", amount=amount, created_at=datetime.now().isoformat())
@@ -178,6 +188,9 @@ def api_withdraw(account_id):
     amount = data.get("amount", 0)
     if amount <= 0:
         abort(400, description="Withdraw amount must be positive")
+    # Validate amount has at most two decimal places
+    if round(amount * 100) != amount * 100:
+        abort(400, description="Withdraw amount cannot have more than two decimal places")
     if float(account.get("balance", 0)) < amount:
         abort(400, description="Insufficient balance")
     new_balance = float(account.get("balance", 0)) - amount

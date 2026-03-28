@@ -57,7 +57,7 @@ const TokenContext = React.createContext(null);
 
 function App() {
   // JWT token state
-  const [token, setToken] = useState(null);
+  const [token, setToken] = useState(() => localStorage.getItem('token'));
   // Transaction modal state
   const [transactions, setTransactions] = useState([]);
       const [txnLoading, setTxnLoading] = useState(false);
@@ -166,7 +166,10 @@ function App() {
   const [selectedAccount, setSelectedAccount] = useState(null);
 
   const [accounts, setAccounts] = useState([]); // {id, owner, type, balance}
-  const [currentUser, setCurrentUser] = useState(null); // {name, role}
+  const [currentUser, setCurrentUser] = useState(() => {
+    const user = localStorage.getItem('currentUser');
+    return user ? JSON.parse(user) : null;
+  }); // {name, role}
   const [message, setMessage] = useState('');
 
   // Register handler (calls backend)
@@ -204,8 +207,11 @@ function App() {
         return;
       }
       const user = await res.json();
-      setCurrentUser({ user_id: user.user_id, name: user.name, role: user.role });
+      const userObj = { user_id: user.user_id, name: user.name, role: user.role };
+      setCurrentUser(userObj);
       setToken(user.access_token);
+      localStorage.setItem('token', user.access_token);
+      localStorage.setItem('currentUser', JSON.stringify(userObj));
       setMessage('Login successful!');
       if (user.role === 'admin') fetchUsers();
     } catch (e) {
@@ -245,6 +251,8 @@ function App() {
   const handleLogout = () => {
     setCurrentUser(null);
     setToken(null);
+    localStorage.removeItem('token');
+    localStorage.removeItem('currentUser');
     setMessage('Logged out.');
   };
 
